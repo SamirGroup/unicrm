@@ -15,17 +15,15 @@
     </div>
     <div class="stat bg-base-100 shadow-lg rounded-box">
         <div class="stat-title">Faol</div>
-        <div class="stat-value text-success">{{ modules|filter_by:"is_active"|length|default:"0" }}</div>
+        <div class="stat-value text-success">{{ active_count|default:"0" }}</div>
     </div>
     <div class="stat bg-base-100 shadow-lg rounded-box">
         <div class="stat-title">Premium</div>
-        <div class="stat-value text-warning">{{ modules|filter_by:"is_premium"|length|default:"0" }}</div>
+        <div class="stat-value text-warning">{{ premium_count|default:"0" }}</div>
     </div>
     <div class="stat bg-base-100 shadow-lg rounded-box">
         <div class="stat-title">Kategoriyalar</div>
-        <div class="stat-value text-info">
-            {% with cats=modules|map:"category"|unique %}{{ cats|length|default:"0" }}{% endwith %}
-        </div>
+        <div class="stat-value text-info">{{ category_count|default:"0" }}</div>
     </div>
 </div>
 

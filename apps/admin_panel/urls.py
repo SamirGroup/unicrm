@@ -24,6 +24,7 @@ urlpatterns = [
     
     # Users
     path('users/', views.users_list, name='users'),
+    path('users/create/', views.user_create, name='user_create'),
     path('users/<int:pk>/', views.user_detail, name='user_detail'),
     
     # Modules

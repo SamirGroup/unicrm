@@ -2,9 +2,15 @@
 {% block title %}Foydalanuvchilar{% endblock %}
 
 {% block content %}
-<div class="mb-6">
-    <h1 class="text-3xl font-bold">Foydalanuvchilar</h1>
-    <p class="text-base-content/70">Barcha ro'yxatdan o'tgan foydalanuvchilar</p>
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-3xl font-bold">Foydalanuvchilar</h1>
+        <p class="text-base-content/70">Barcha ro'yxatdan o'tgan foydalanuvchilar</p>
+    </div>
+    <a href="{% url 'admin_panel:user_create' %}" class="btn btn-primary gap-2">
+        <i class="fas fa-user-plus"></i>
+        Yangi Foydalanuvchi
+    </a>
 </div>
 
 <!-- Qidiruv -->

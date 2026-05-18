@@ -1,0 +1,354 @@
+{% extends 'admin_panel/base.html' %}
+{% block title %}Yangi Foydalanuvchi{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{% url 'admin_panel:users' %}" class="btn btn-ghost btn-sm gap-2">
+        <i class="fas fa-arrow-left"></i>
+        Orqaga
+    </a>
+    <h1 class="text-3xl font-bold mt-2">Yangi Foydalanuvchi Yaratish</h1>
+    <p class="text-base-content/70">Login/parol bering va kerakli modullarni tanlang</p>
+</div>
+
+<form method="post" id="userCreateForm">
+    {% csrf_token %}
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Foydalanuvchi ma'lumotlari -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-primary mb-4">
+                    <i class="fas fa-user"></i>
+                    Foydalanuvchi ma'lumotlari
+                </h2>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Login *</span>
+                        </label>
+                        <input type="text" name="username" class="input input-bordered" 
+                               placeholder="foydalanuvchi_nomi" required autofocus>
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Parol *</span>
+                        </label>
+                        <input type="text" name="password" class="input input-bordered" 
+                               placeholder="kuchli_parol" required>
+                    </div>
+                </div>
+                
+                <div class="form-control mt-4">
+                    <label class="label">
+                        <span class="label-text">Email</span>
+                    </label>
+                    <input type="email" name="email" class="input input-bordered" 
+                           placeholder="email@example.com">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Ism</span>
+                        </label>
+                        <input type="text" name="first_name" class="input input-bordered" 
+                               placeholder="Ism">
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Familiya</span>
+                        </label>
+                        <input type="text" name="last_name" class="input input-bordered" 
+                               placeholder="Familiya">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tashkilot ma'lumotlari -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-secondary mb-4">
+                    <i class="fas fa-building"></i>
+                    Tashkilot va Shartnoma
+                </h2>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Tashkilot nomi *</span>
+                    </label>
+                    <input type="text" name="organization_name" class="input input-bordered" 
+                           placeholder="ABC Company" required>
+                </div>
+                
+                <div class="form-control mt-4">
+                    <label class="label">
+                        <span class="label-text">Workspace nomi</span>
+                    </label>
+                    <input type="text" name="workspace_name" class="input input-bordered" 
+                           placeholder="Tashkilot nomi bilan bir xil">
+                </div>
+                
+                <div class="form-control mt-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Shartnoma raqami</span>
+                    </label>
+                    <input type="text" name="contract_number" class="input input-bordered" 
+                           placeholder="Avtomatik yaratiladi">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Boshlanish sanasi</span>
+                        </label>
+                        <input type="date" name="start_date" class="input input-bordered" 
+                               value="{{ today }}">
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Tugash sanasi</span>
+                        </label>
+                        <input type="date" name="end_date" class="input input-bordered" 
+                               value="{{ next_month }}">
+                    </div>
+                </div>
+                
+                <div class="form-control mt-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Asosiy oylik to'lov (so'm)</span>
+                    </label>
+                    <input type="number" name="base_monthly_fee" class="input input-bordered" 
+                           value="100000" min="0">
+                    <label class="label">
+                        <span class="label-text-alt">Modullar narxlari bundan qo'shiladi</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modullar tanlash -->
+    <div class="card bg-base-100 shadow-xl mt-6">
+        <div class="card-body">
+            <h2 class="card-title text-info mb-4">
+                <i class="fas fa-puzzle-piece"></i>
+                Kerakli Modullarni Tanlang
+            </h2>
+            
+            <!-- Qidiruv -->
+            <div class="form-control mb-4">
+                <input type="text" id="moduleSearch" 
+                       placeholder="Modul qidirish..." 
+                       class="input input-bordered input-sm w-full max-w-md">
+            </div>
+            
+            <!-- Default modullar (bepul) -->
+            <div class="alert alert-info mb-4">
+                <i class="fas fa-info-circle"></i>
+                <span><strong>Asosiy modullar (bepul):</strong> Buyurtmalar, Mijozlar, Mahsulotlar - avtomatik ulanadi</span>
+            </div>
+            
+            <!-- Kategoriyalar bo'yicha modullar -->
+            <div class="space-y-4">
+                {% for category, modules in modules_by_category.items %}
+                <div class="border rounded-lg p-4 bg-base-200">
+                    <h4 class="font-bold text-lg mb-3 flex items-center gap-2">
+                        <i class="fas fa-folder text-primary"></i>
+                        {{ category }}
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {% for module in modules %}
+                        <label class="module-card card bg-base-100 shadow-sm border hover:border-primary cursor-pointer transition-all" data-module="{{ module.module_type }}">
+                            <div class="card-body p-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                                            <i class="fas fa-{{ module.icon }} text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-semibold text-sm">{{ module.name }}</h5>
+                                            <p class="text-xs text-base-content/60">
+                                                {% if module.price > 0 %}
+                                                {{ module.price|floatformat:0 }} so'm/oy
+                                                {% else %}
+                                                <span class="text-success">Bepul</span>
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <input type="checkbox" name="modules" value="{{ module.module_type }}"
+                                           class="checkbox checkbox-primary checkbox-sm"
+                                           data-price="{{ module.price }}">
+                                </div>
+                                {% if module.description %}
+                                <p class="text-xs text-base-content/70 mt-2">{{ module.description }}</p>
+                                {% endif %}
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Tanlangan modullar va hisob-kitob -->
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 border-2 border-dashed border-primary rounded-lg bg-primary/5">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <i class="fas fa-check-circle text-success"></i>
+                        Tanlangan Modullar
+                        <span class="badge badge-primary" id="selectedCount">0</span>
+                    </h4>
+                    <div id="selectedModules" class="flex flex-wrap gap-2 min-h-[40px]">
+                        <p class="text-base-content/50 text-sm italic" id="noModulesText">Hali modul tanlanmadi</p>
+                    </div>
+                </div>
+                
+                <div class="p-4 bg-success/10 border border-success rounded-lg">
+                    <h4 class="font-bold mb-3">Oylik To'lov Hisoboti</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span>Asosiy tarif:</span>
+                            <span class="font-bold" id="baseFee">0 so'm</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Modullar:</span>
+                            <span class="font-bold text-primary" id="modulesFee">0 so'm</span>
+                        </div>
+                        <div class="divider my-1"></div>
+                        <div class="flex justify-between text-lg">
+                            <span class="font-bold">Jami:</span>
+                            <span class="font-bold text-success" id="totalFee">0 so'm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Submit tugmalari -->
+    <div class="flex justify-between items-center mt-6">
+        <a href="{% url 'admin_panel:users' %}" class="btn btn-ghost">
+            <i class="fas fa-times mr-2"></i>
+            Bekor qilish
+        </a>
+        <button type="submit" class="btn btn-primary btn-lg gap-2">
+            <i class="fas fa-user-plus"></i>
+            Foydalanuvchi Yaratish
+        </button>
+    </div>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('input[name="modules"]');
+    const selectedModulesDiv = document.getElementById('selectedModules');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    const noModulesText = document.getElementById('noModulesText');
+    const baseFeeInput = document.querySelector('input[name="base_monthly_fee"]');
+    const baseFeeSpan = document.getElementById('baseFee');
+    const modulesFeeSpan = document.getElementById('modulesFee');
+    const totalFeeSpan = document.getElementById('totalFee');
+    const searchInput = document.getElementById('moduleSearch');
+    const moduleCards = document.querySelectorAll('.module-card');
+    
+    // Base fee
+    function updateBaseFee() {
+        const baseFee = parseInt(baseFeeInput.value) || 0;
+        baseFeeSpan.textContent = baseFee.toLocaleString() + ' so\'m';
+        updateTotal();
+    }
+    
+    baseFeeInput.addEventListener('input', updateBaseFee);
+    updateBaseFee();
+    
+    // Modullarni yangilash
+    function updateModules() {
+        const selected = Array.from(checkboxes).filter(cb => cb.checked);
+        let modulesTotal = 0;
+        
+        selected.forEach(cb => {
+            modulesTotal += parseInt(cb.dataset.price) || 0;
+        });
+        
+        selectedCountSpan.textContent = selected.length;
+        modulesFeeSpan.textContent = modulesTotal.toLocaleString() + ' so\'m';
+        
+        if (selected.length === 0) {
+            noModulesText.style.display = 'block';
+            selectedModulesDiv.innerHTML = '';
+            selectedModulesDiv.appendChild(noModulesText);
+        } else {
+            noModulesText.style.display = 'none';
+            selectedModulesDiv.innerHTML = selected.map(cb => {
+                const card = cb.closest('.module-card');
+                const name = card.querySelector('h5').textContent;
+                const price = parseInt(cb.dataset.price) || 0;
+                return `
+                    <span class="badge badge-primary gap-1 p-2">
+                        <i class="fas fa-check text-xs"></i>
+                        ${name}
+                        ${price > 0 ? `<span class="text-xs opacity-70">${price.toLocaleString()}</span>` : ''}
+                    </span>
+                `;
+            }).join('');
+        }
+        
+        updateTotal();
+    }
+    
+    function updateTotal() {
+        const baseFee = parseInt(baseFeeInput.value) || 0;
+        const modulesTotal = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .reduce((sum, cb) => sum + (parseInt(cb.dataset.price) || 0), 0);
+        totalFeeSpan.textContent = (baseFee + modulesTotal).toLocaleString() + ' so\'m';
+    }
+    
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateModules);
+    });
+    
+    // Qidiruv
+    searchInput.addEventListener('input', function(e) {
+        const term = e.target.value.toLowerCase();
+        moduleCards.forEach(card => {
+            const name = card.querySelector('h5').textContent.toLowerCase();
+            const desc = card.querySelector('p.text-xs')?.textContent.toLowerCase() || '';
+            card.style.display = (name.includes(term) || desc.includes(term)) ? 'block' : 'none';
+        });
+    });
+    
+    // Card click
+    moduleCards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (e.target.tagName !== 'INPUT') {
+                const cb = this.querySelector('input[type="checkbox"]');
+                cb.checked = !cb.checked;
+                updateModules();
+            }
+        });
+    });
+});
+</script>
+
+<style>
+.module-card {
+    transition: all 0.2s ease;
+}
+.module-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.module-card:has(input:checked) {
+    border-color: hsl(var(--p));
+    background-color: hsl(var(--p) / 0.05);
+}
+</style>
+{% endblock %}

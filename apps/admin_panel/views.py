@@ -455,6 +455,115 @@ def users_list(request):
     return render(request, 'admin_panel/users.html', context)
 
 @admin_required
+def user_create(request):
+    """Yangi foydalanuvchi yaratish (Super Admin orqali)"""
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+        email = request.POST.get('email', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        
+        # Shartnoma ma'lumotlari
+        org_name = request.POST.get('organization_name', '').strip()
+        workspace_name = request.POST.get('workspace_name', org_name).strip()
+        contract_number = request.POST.get('contract_number', '').strip()
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        base_monthly_fee = request.POST.get('base_monthly_fee', 0)
+        
+        # Modullar
+        selected_modules = request.POST.getlist('modules')
+        
+        if not username or not password:
+            messages.error(request, 'Login va parol majburiy!')
+            return redirect('admin_panel:user_create')
+        
+        try:
+            with transaction.atomic():
+                # 1. Foydalanuvchi yaratish
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    is_owner=True
+                )
+                
+                # 2. Workspace yaratish
+                from django.utils.text import slugify
+                workspace = Workspace.objects.create(
+                    name=workspace_name or username,
+                    slug=slugify(workspace_name or username) + '-' + str(user.id),
+                    owner=user,
+                    plan='business',
+                    status='active'
+                )
+                
+                # 3. Workspace member
+                WorkspaceMember.objects.create(
+                    workspace=workspace,
+                    user=user,
+                    role='owner'
+                )
+                
+                # 4. Modullar yaratish
+                default_modules = ['orders', 'clients', 'products']
+                all_modules = list(set(default_modules + selected_modules))
+                
+                for mod_type in all_modules:
+                    Module.objects.create(
+                        workspace=workspace,
+                        module_type=mod_type,
+                        is_enabled=True
+                    )
+                
+                # 5. Shartnoma yaratish
+                contract = Contract.objects.create(
+                    organization_name=org_name or username,
+                    workspace=workspace,
+                    owner_user=user,
+                    contract_number=contract_number or f'CTR-{user.id:04d}',
+                    contract_date=date.today(),
+                    start_date=start_date or date.today(),
+                    end_date=end_date or (date.today() + timedelta(days=30)),
+                    base_monthly_fee=base_monthly_fee,
+                    status='active',
+                    allowed_modules=all_modules
+                )
+                contract.recalculate_monthly_fee()
+                
+                messages.success(
+                    request, 
+                    f'Foydalanuvchi "{username}" muvaffaqiyatli yaratildi! '
+                    f'Login: {username}, Parol: {password}. '
+                    f'Oylik to\'lov: {contract.monthly_fee} so\'m'
+                )
+                return redirect('admin_panel:users')
+                
+        except Exception as e:
+            messages.error(request, f'Xatolik: {str(e)}')
+            return redirect('admin_panel:user_create')
+    
+    # GET so'rov - form ko'rsatish
+    available_modules = ModulePrice.objects.filter(is_active=True).order_by('category', 'name')
+    
+    from collections import defaultdict
+    modules_by_category = defaultdict(list)
+    for mod in available_modules:
+        modules_by_category[mod.get_category_display()].append(mod)
+    
+    context = {
+        'modules_by_category': dict(modules_by_category),
+        'today': date.today().isoformat(),
+        'next_month': (date.today() + timedelta(days=30)).isoformat(),
+        'admin_username': request.session.get('admin_username'),
+    }
+    
+    return render(request, 'admin_panel/user_create.html', context)
+
+@admin_required
 def user_detail(request, pk):
     """Foydalanuvchi detallari"""
     user = get_object_or_404(User, pk=pk)
@@ -483,9 +592,17 @@ def modules_list(request):
     for mod in modules:
         modules_by_category[mod.get_category_display()].append(mod)
     
+    # Statistika
+    active_count = modules.filter(is_active=True).count()
+    premium_count = modules.filter(is_premium=True).count()
+    category_count = modules.values('category').distinct().count()
+    
     context = {
         'modules': modules,
         'modules_by_category': dict(modules_by_category),
+        'active_count': active_count,
+        'premium_count': premium_count,
+        'category_count': category_count,
         'admin_username': request.session.get('admin_username'),
     }
     
