@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Modullar{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold">Modullar</h1>
+    <p class="text-base-content/70">{{ workspace.name }} - Modullarni boshqarish</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for module in modules %}
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <i class="fas fa-{% if module.module_type == 'orders' %}shopping-cart{% elif module.module_type == 'clients' %}users{% elif module.module_type == 'products' %}box{% else %}puzzle-piece{% endif %} text-primary text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold capitalize">{{ module.module_type }}</h3>
+                        <span class="text-sm text-base-content/70">Modul</span>
+                    </div>
+                </div>
+                <label class="label cursor-pointer">
+                    <input type="checkbox" 
+                           class="toggle toggle-primary" 
+                           {% if module.is_enabled %}checked{% endif %}
+                           hx-post="{% url 'workspaces:toggle_module' workspace.slug module.module_type %}"
+                           hx-swap="none"
+                           hx-on::after-request="this.checked = JSON.parse(event.detail.xhr.responseText).is_enabled">
+                </label>
+            </div>
+            
+            <p class="text-sm text-base-content/70 mb-4">
+                {% if module.is_enabled %}
+                <span class="text-success"><i class="fas fa-check-circle"></i> Yoqilgan</span>
+                {% else %}
+                <span class="text-error"><i class="fas fa-times-circle"></i> O'chirilgan</span>
+                {% endif %}
+            </p>
+            
+            <div class="divider my-2"></div>
+            
+            <button class="btn btn-ghost btn-sm btn-block">
+                <i class="fas fa-cog"></i>
+                Sozlamalar
+            </button>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body text-center py-12">
+                <i class="fas fa-puzzle-piece text-6xl text-base-content/20 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">Modullar topilmadi</h2>
+                <p class="text-base-content/70">Workspace yaratilganda avtomatik modullar qo'shiladi.</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

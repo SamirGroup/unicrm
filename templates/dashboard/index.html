@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div x-data="dashboardData()" x-init="init()">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold">Dashboard</h1>
+        <p class="text-base-content/70">Xush kelibsiz, {{ user.first_name|default:user.username }}!</p>
+    </div>
+    
+    {% if workspace %}
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="stats shadow">
+            <div class="stat">
+                <div class="stat-figure text-primary">
+                    <i class="fas fa-users text-3xl"></i>
+                </div>
+                <div class="stat-title">Jami Mijozlar</div>
+                <div class="stat-value text-primary" x-text="stats.clients">0</div>
+                <div class="stat-desc">O'tgan oydan +{{ stats.clients_growth }}%</div>
+            </div>
+        </div>
+        
+        <div class="stats shadow">
+            <div class="stat">
+                <div class="stat-figure text-secondary">
+                    <i class="fas fa-shopping-cart text-3xl"></i>
+                </div>
+                <div class="stat-title">Jami Buyurtmalar</div>
+                <div class="stat-value text-secondary" x-text="stats.orders">0</div>
+                <div class="stat-desc">Faol: <span x-text="stats.active_orders"></span></div>
+            </div>
+        </div>
+        
+        <div class="stats shadow">
+            <div class="stat">
+                <div class="stat-figure text-accent">
+                    <i class="fas fa-dollar-sign text-3xl"></i>
+                </div>
+                <div class="stat-title">Umumiy Tushum</div>
+                <div class="stat-value text-accent" x-text="stats.revenue">0</div>
+                <div class="stat-desc">Bu oy</div>
+            </div>
+        </div>
+        
+        <div class="stats shadow">
+            <div class="stat">
+                <div class="stat-figure text-info">
+                    <i class="fas fa-robot text-3xl"></i>
+                </div>
+                <div class="stat-title">AI Tahlil</div>
+                <div class="stat-value text-info" x-text="stats.ai_insights">0</div>
+                <div class="stat-desc">Yangiliklar</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title">So'nggi 30 kunlik buyurtmalar</h2>
+                <canvas id="ordersChart" height="200"></canvas>
+            </div>
+        </div>
+        
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title">Top 5 mijozlar</h2>
+                <div class="overflow-x-auto">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Mijoz</th>
+                                <th>Buyurtmalar</th>
+                                <th>Summa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="client in topClients" :key="client.id">
+                                <tr>
+                                    <td x-text="client.name"></td>
+                                    <td x-text="client.order_count"></td>
+                                    <td x-text="client.total"></td>
+                                </tr>
+                            </template>
+                            <tr x-show="topClients.length === 0">
+                                <td colspan="3" class="text-center text-base-content/50">Ma'lumot yo'q</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AI Summary Card -->
+    <div class="card bg-gradient-to-r from-primary to-secondary text-white shadow-xl" 
+         hx-get="{% url 'dashboard:daily_summary' %}" 
+         hx-trigger="load" 
+         hx-swap="innerHTML">
+        <div class="card-body">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-robot text-2xl"></i>
+                <h2 class="card-title">AI Kunlik Hisobot</h2>
+            </div>
+            <div class="htmx-indicator mt-2">Yuklanmoqda...</div>
+            <div id="ai-summary-content"></div>
+        </div>
+    </div>
+    {% else %}
+    <!-- No Workspace -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body text-center py-12">
+            <i class="fas fa-building text-6xl text-base-content/20 mb-4"></i>
+            <h2 class="text-2xl font-bold mb-2">Workspace topilmadi</h2>
+            <p class="text-base-content/70 mb-6">Iltimos, yangi workspace yarating yoki a'zo bo'ling.</p>
+            <a href="/workspace/create/" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Yangi Workspace Yaratish
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function dashboardData() {
+    return {
+        stats: { clients: 0, orders: 0, revenue: '0', clients_growth: 0, active_orders: 0, ai_insights: 0 },
+        topClients: [],
+        
+        async init() {
+            await this.loadStats();
+            await this.loadTopClients();
+            this.initChart();
+        },
+        
+        async loadStats() {
+            try {
+                const response = await fetch('{% url "dashboard:stats_api" %}');
+                const data = await response.json();
+                this.stats = data;
+            } catch (error) {
+                console.error('Stats loading error:', error);
+            }
+        },
+        
+        async loadTopClients() {
+            try {
+                const response = await fetch('{% url "dashboard:top_clients_api" %}');
+                this.topClients = await response.json();
+            } catch (error) {
+                console.error('Top clients loading error:', error);
+            }
+        },
+        
+        initChart() {
+            fetch('{% url "dashboard:orders_chart_api" %}')
+                .then(res => res.json())
+                .then(data => {
+                    new Chart(document.getElementById('ordersChart'), {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Buyurtmalar',
+                                data: data.values,
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59,130,246,0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: { 
+                            responsive: true, 
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+                })
+                .catch(err => console.error('Chart loading error:', err));
+        }
+    }
+}
+</script>
+{% endblock %}

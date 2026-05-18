@@ -1,0 +1,128 @@
+{% extends 'admin_panel/base.html' %}
+{% block title %}To'lovlar{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold">To'lovlar</h1>
+    <p class="text-base-content/70">Barcha to'lovlar va tushumlar statistikasi</p>
+</div>
+
+<!-- Tushumlar kartochkalari -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="card bg-gradient-to-br from-success to-emerald-600 text-white shadow-xl">
+        <div class="card-body">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-80">Kunlik tushum</p>
+                    <p class="text-2xl font-bold">{{ daily_revenue|floatformat:0 }} so'm</p>
+                </div>
+                <i class="fas fa-calendar-day text-4xl opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card bg-gradient-to-br from-primary to-blue-600 text-white shadow-xl">
+        <div class="card-body">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-80">Haftalik tushum</p>
+                    <p class="text-2xl font-bold">{{ weekly_revenue|floatformat:0 }} so'm</p>
+                </div>
+                <i class="fas fa-calendar-week text-4xl opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card bg-gradient-to-br from-secondary to-purple-600 text-white shadow-xl">
+        <div class="card-body">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-80">Oylik tushum</p>
+                    <p class="text-2xl font-bold">{{ monthly_revenue|floatformat:0 }} so'm</p>
+                </div>
+                <i class="fas fa-calendar-alt text-4xl opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filterlar -->
+<div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card-body py-4">
+        <form method="get" class="flex flex-wrap gap-4">
+            <select name="status" class="select select-bordered">
+                <option value="">Barcha statuslar</option>
+                <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Amalga oshirilgan</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Kutilmoqda</option>
+                <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>Muvaffaqiyatsiz</option>
+                <option value="refunded" {% if status_filter == 'refunded' %}selected{% endif %}>Qaytarilgan</option>
+            </select>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-filter"></i>
+                Filter
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Jadval -->
+<div class="card bg-base-100 shadow-xl">
+    <div class="card-body p-0">
+        <div class="overflow-x-auto">
+            <table class="table table-zebra">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tashkilot</th>
+                        <th>Summa</th>
+                        <th>To'lov usuli</th>
+                        <th>Status</th>
+                        <th>Sana</th>
+                        <th>Davomiylik</th>
+                        <th>Izoh</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td class="font-mono">#{{ payment.id }}</td>
+                        <td>
+                            <a href="{% url 'admin_panel:contract_detail' payment.contract.pk %}" 
+                               class="link link-primary font-semibold">
+                                {{ payment.contract.organization_name }}
+                            </a>
+                        </td>
+                        <td class="font-bold text-success">{{ payment.amount|floatformat:0 }} so'm</td>
+                        <td>{{ payment.payment_method|default:"Naqd" }}</td>
+                        <td>
+                            <span class="badge badge-{% if payment.status == 'completed' %}success{% elif payment.status == 'pending' %}warning{% elif payment.status == 'refunded' %}info{% else %}error{% endif %} gap-1">
+                                {{ payment.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="text-sm">
+                                {{ payment.created_at|date:"d.m.Y" }}
+                                <div class="text-xs opacity-60">{{ payment.created_at|time:"H:i" }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="text-xs">
+                                {{ payment.period_start|date:"d.m" }} - {{ payment.period_end|date:"d.m.Y" }}
+                            </div>
+                        </td>
+                        <td class="max-w-xs truncate">{{ payment.notes|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-8 text-base-content/50">
+                            <i class="fas fa-receipt text-4xl mb-2"></i>
+                            <p>To'lovlar yo'q</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

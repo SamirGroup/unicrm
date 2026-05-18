@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Profil{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6">Profil</h1>
+    
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <div class="flex items-center gap-6 mb-8">
+                <div class="avatar placeholder">
+                    <div class="bg-gradient-to-br from-primary to-secondary text-white rounded-full w-24 text-4xl">
+                        <span>{{ user.username|first|upper }}</span>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold">{{ user.get_full_name|default:user.username }}</h2>
+                    <p class="text-base-content/70">{{ user.email }}</p>
+                    <span class="badge badge-primary badge-sm mt-2">
+                        {% if user.is_owner %}Owner{% else %}User{% endif %}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Foydalanuvchi nomi</span>
+                    </label>
+                    <input type="text" value="{{ user.username }}" class="input input-bordered" disabled>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Email</span>
+                    </label>
+                    <input type="email" value="{{ user.email }}" class="input input-bordered" disabled>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Telegram</span>
+                    </label>
+                    <div class="input input-bordered flex items-center gap-2">
+                        {% if user.telegram_username %}
+                        <i class="fab fa-telegram text-primary"></i>
+                        <span>@{{ user.telegram_username }}</span>
+                        {% else %}
+                        <span class="text-base-content/50">Ulanmagan</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Hisob yaratilgan</span>
+                    </label>
+                    <input type="text" value="{{ user.date_joined|date:'d.m.Y H:i' }}" class="input input-bordered" disabled>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="flex gap-3">
+                <button class="btn btn-primary">
+                    <i class="fas fa-edit"></i>
+                    Tahrirlash
+                </button>
+                <button class="btn btn-error">
+                    <i class="fas fa-key"></i>
+                    Parolni o'zgartirish
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% block title %}{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <nav class="flex text-sm mb-2">
+        <a href="/orders/{{ workspace.slug }}/" class="text-base-content/70 hover:text-primary">
+            <i class="fas fa-arrow-left"></i> Buyurtmalar
+        </a>
+        <span class="mx-2 text-base-content/50">/</span>
+        <span class="text-base-content">{{ order.order_number }}</span>
+    </nav>
+    <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold">{{ order.order_number }}</h1>
+        <span class="badge badge-{% if order.status == 'completed' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'processing' %}primary{% else %}error{% endif %} badge-lg">
+            {{ order.get_status_display }}
+        </span>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Order Details -->
+    <div class="lg:col-span-2">
+        <div class="card bg-base-100 shadow-xl mb-6">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Buyurtma Ma'lumotlari</h2>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="label"><span class="label-text font-semibold">Mijoz</span></label>
+                        {% if order.client %}
+                        <a href="/clients/{{ workspace.slug }}/{{ order.client.id }}/" class="link link-primary">
+                            {{ order.client.full_name }}
+                        </a>
+                        {% else %}
+                        <span class="text-base-content/50">Noma'lum</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="label"><span class="label-text font-semibold">Sana</span></label>
+                        <span>{{ order.created_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                    <div>
+                        <label class="label"><span class="label-text font-semibold">Yaratgan</span></label>
+                        <span>{{ order.created_by.get_full_name|default:order.created_by.username }}</span>
+                    </div>
+                    <div>
+                        <label class="label"><span class="label-text font-semibold">O'zgartirilgan</span></label>
+                        <span>{{ order.updated_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                </div>
+                
+                {% if order.notes %}
+                <div class="mb-4">
+                    <label class="label"><span class="label-text font-semibold">Eslatma</span></label>
+                    <div class="p-3 bg-base-200 rounded-lg">
+                        <p class="text-sm whitespace-pre-line">{{ order.notes }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Order Items -->
+                <div class="divider">Mahsulotlar</div>
+                
+                <div class="overflow-x-auto">
+                    <table class="table w-full">
+                        <thead>
+                            <tr>
+                                <th>Nomi</th>
+                                <th>Soni</th>
+                                <th>Narx</th>
+                                <th>Jami</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.unit_price }} so'm</td>
+                                <td class="font-semibold">{{ item.total }} so'm</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-base-content/50">
+                                    Mahsulotlar yo'q
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3" class="text-right">Jami:</th>
+                                <th class="text-primary text-xl">{{ order.total_amount }} so'm</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status History / Timeline -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Status Tarixi</h2>
+                <div class="timeline timeline-vertical">
+                    <li>
+                        <hr class="bg-primary"/>
+                        <div class="timeline-start">{{ order.created_at|date:"d.m.Y H:i" }}</div>
+                        <div class="timeline-middle">
+                            <i class="fas fa-clock text-primary"></i>
+                        </div>
+                        <div class="timeline-end timeline-box">Yaratildi</div>
+                    </li>
+                    <li>
+                        <hr class="bg-base-300"/>
+                        <div class="timeline-start">{{ order.updated_at|date:"d.m.Y H:i" }}</div>
+                        <div class="timeline-middle">
+                            <i class="fas fa-sync text-base-content/50"></i>
+                        </div>
+                        <div class="timeline-end timeline-box">O'zgartirildi</div>
+                    </li>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Actions -->
+    <div class="lg:col-span-1">
+        <div class="card bg-base-100 shadow-xl mb-6">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Amallar</h2>
+                
+                <div class="space-y-3">
+                    <button class="btn btn-primary w-full">
+                        <i class="fas fa-edit"></i>
+                        Tahrirlash
+                    </button>
+                    
+                    <select class="select select-bordered w-full" id="status-change">
+                        <option disabled selected>Status o'zgartirish</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="refunded">Refunded</option>
+                    </select>
+                    
+                    <button class="btn btn-error w-full">
+                        <i class="fas fa-trash"></i>
+                        O'chirish
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Print -->
+        <div class="card bg-gradient-to-r from-primary to-secondary text-white shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-white">Hisob-faktura</h2>
+                <p class="text-sm opacity-90">Buyurtma ma'lumotlarini chop etish</p>
+                <button class="btn btn-outline btn-primary mt-4">
+                    <i class="fas fa-print"></i>
+                    Chop etish
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

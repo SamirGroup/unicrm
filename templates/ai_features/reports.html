@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}AI Hisobotlar{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold">AI Hisobotlar</h1>
+    <p class="text-base-content/70">Sun'iy intellekt yordamida tahliliy hisobotlar</p>
+</div>
+
+<!-- AI Feature Banner -->
+<div class="card bg-gradient-to-r from-primary to-secondary text-white shadow-xl mb-6">
+    <div class="card-body flex flex-row items-center gap-6">
+        <div class="flex-1">
+            <div class="flex items-center gap-3 mb-3">
+                <i class="fas fa-robot text-4xl"></i>
+                <h2 class="text-2xl font-bold">UniCRM AI Assistant</h2>
+            </div>
+            <p class="text-sm opacity-90 mb-4">
+                Sun'iy intellekt yordamida avtomatik hisobotlar, tahlillar va tavsiyalar oling.
+            </p>
+            <div class="badge badge-outline badge-lg">Demo Version</div>
+        </div>
+        <div class="flex-none">
+            <button class="btn btn-outline btn-lg text-white border-white hover:bg-white hover:text-primary">
+                <i class="fas fa-cog"></i>
+                Sozlamalar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Reports Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Daily Report -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                <i class="fas fa-calendar-day text-primary text-xl"></i>
+            </div>
+            <h3 class="font-bold text-lg">Kunlik Hisobot</h3>
+            <p class="text-sm text-base-content/70 mb-4">
+                Kunlik statistika va AI tavsiyalar
+            </p>
+            <div class="flex items-center gap-2 text-sm mb-4">
+                <i class="fas fa-clock text-base-content/50"></i>
+                <span>Har kuni 09:00 da</span>
+            </div>
+            <button class="btn btn-primary btn-block">
+                <i class="fas fa-play"></i>
+                Yaratish
+            </button>
+        </div>
+    </div>
+    
+    <!-- Weekly Report -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <div class="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center mb-3">
+                <i class="fas fa-calendar-week text-secondary text-xl"></i>
+            </div>
+            <h3 class="font-bold text-lg">Haftalik Hisobot</h3>
+            <p class="text-sm text-base-content/70 mb-4">
+                Haftalik tahlil va trendlar
+            </p>
+            <div class="flex items-center gap-2 text-sm mb-4">
+                <i class="fas fa-clock text-base-content/50"></i>
+                <span>Har dushanba</span>
+            </div>
+            <button class="btn btn-secondary btn-block">
+                <i class="fas fa-play"></i>
+                Yaratish
+            </button>
+        </div>
+    </div>
+    
+    <!-- Client Insights -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <div class="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-3">
+                <i class="fas fa-users text-accent text-xl"></i>
+            </div>
+            <h3 class="font-bold text-lg">Mijoz Tahlili</h3>
+            <p class="text-sm text-base-content/70 mb-4">
+                Har bir mijoz uchun AI tahlili
+            </p>
+            <div class="flex items-center gap-2 text-sm mb-4">
+                <i class="fas fa-info-circle text-base-content/50"></i>
+                <span>Real vaqt</span>
+            </div>
+            <button class="btn btn-accent btn-block">
+                <i class="fas fa-search"></i>
+                Tahlil Qilish
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Demo Summary -->
+<div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="card-title">
+                <i class="fas fa-robot text-primary"></i>
+                Oxirgi AI Hisobot
+            </h2>
+            <button class="btn btn-primary btn-sm" hx-get="{% url 'ai:generate_daily_summary' workspace.slug %}" 
+                    hx-target="#ai-summary-content" 
+                    hx-swap="innerHTML">
+                <i class="fas fa-sync"></i>
+                Yangilash
+            </button>
+        </div>
+        
+        <div id="ai-summary-content" class="prose prose-lg max-w-none p-6 bg-base-200 rounded-lg">
+            <div class="text-center py-8">
+                <i class="fas fa-robot text-5xl text-base-content/20 mb-4"></i>
+                <p class="text-base-content/70">AI hisobot yaratish uchun "Yangilash" tugmasini bosing</p>
+            </div>
+        </div>
+        
+        <div class="mt-4 p-4 bg-warning/10 border border-warning rounded-lg">
+            <div class="flex items-start gap-3">
+                <i class="fas fa-info-circle text-warning mt-1"></i>
+                <div>
+                    <p class="font-semibold text-warning">Demo Versiya</p>
+                    <p class="text-sm text-base-content/70 mt-1">
+                        Bu demo versiya. To'liq AI funksiyalar uchun OpenAI API kalitini sozlang.
+                        `.env` fayliga `OPENAI_API_KEY` qo'shing va OpenAI kutubxonasidan foydalaning.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

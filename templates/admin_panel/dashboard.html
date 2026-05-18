@@ -1,0 +1,284 @@
+{% extends 'admin_panel/base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold">Dashboard</h1>
+    <p class="text-base-content/70">Umumiy statistika va tushumlar</p>
+</div>
+
+<!-- Statistika Kartochkalari -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <!-- Shartnomalar -->
+    <div class="stats shadow bg-primary text-primary-content">
+        <div class="stat">
+            <div class="stat-title text-primary-content/80">Jami Shartnomalar</div>
+            <div class="stat-value">{{ total_contracts }}</div>
+            <div class="stat-desc text-primary-content/60">
+                <span class="text-success">{{ active_contracts }}</span> faol
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tushum -->
+    <div class="stats shadow bg-success text-success-content">
+        <div class="stat">
+            <div class="stat-title text-success-content/80">Oylik Tushum</div>
+            <div class="stat-value text-2xl">{{ monthly_revenue|floatformat:0 }} so'm</div>
+            <div class="stat-desc text-success-content/60">Bu oy</div>
+        </div>
+    </div>
+    
+    <!-- Foydalanuvchilar -->
+    <div class="stats shadow bg-info text-info-content">
+        <div class="stat">
+            <div class="stat-title text-info-content/80">Foydalanuvchilar</div>
+            <div class="stat-value">{{ total_users }}</div>
+            <div class="stat-desc text-info-content/60">{{ total_workspaces }} workspace</div>
+        </div>
+    </div>
+    
+    <!-- Qarzdorlik -->
+    <div class="stats shadow bg-warning text-warning-content">
+        <div class="stat">
+            <div class="stat-title text-warning-content/80">Qarzdorlik</div>
+            <div class="stat-value text-2xl">{{ total_debt|floatformat:0 }} so'm</div>
+            <div class="stat-desc text-warning-content/60">Jami</div>
+        </div>
+    </div>
+</div>
+
+<!-- Tushumlar Detali -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-lg bg-success/10 flex items-center justify-center">
+                    <i class="fas fa-calendar-day text-success text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-base-content/70">Kunlik Tushum</p>
+                    <p class="text-2xl font-bold">{{ daily_revenue|floatformat:0 }} so'm</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <i class="fas fa-calendar-week text-primary text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-base-content/70">Haftalik Tushum</p>
+                    <p class="text-2xl font-bold">{{ weekly_revenue|floatformat:0 }} so'm</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-secondary text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-base-content/70">Jami Tushum</p>
+                    <p class="text-2xl font-bold">{{ total_revenue|floatformat:0 }} so'm</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grafik va So'nggi Ma'lumotlar -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Grafik -->
+    <div class="lg:col-span-2 card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title mb-4">
+                <i class="fas fa-chart-line text-primary"></i>
+                Oxirgi 30 kunlik tushum
+            </h2>
+            <canvas id="revenueChart" height="250"></canvas>
+        </div>
+    </div>
+    
+    <!-- Statuslar -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title mb-4">
+                <i class="fas fa-chart-pie text-primary"></i>
+                Shartnoma Statuslari
+            </h2>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-success"></span>
+                        Faol
+                    </span>
+                    <span class="font-bold">{{ active_contracts }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-warning"></span>
+                        Kutilmoqda
+                    </span>
+                    <span class="font-bold">{{ pending_contracts }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-error"></span>
+                        Tugagan
+                    </span>
+                    <span class="font-bold">{{ expired_contracts }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-gray-500"></span>
+                        To'xtatilgan
+                    </span>
+                    <span class="font-bold">{{ suspended_contracts }}</span>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="text-center">
+                <p class="text-sm text-base-content/70">Jami mijozlar</p>
+                <p class="text-3xl font-bold text-primary">{{ total_clients }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- So'nggi Shartnomalar va To'lovlar -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- So'nggi Shartnomalar -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="card-title">
+                    <i class="fas fa-file-contract text-primary"></i>
+                    So'nggi Shartnomalar
+                </h2>
+                <a href="{% url 'admin_panel:contracts' %}" class="btn btn-ghost btn-sm">
+                    Barchasi
+                </a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table table-zebra table-sm">
+                    <thead>
+                        <tr>
+                            <th>Shartnoma</th>
+                            <th>Tashkilot</th>
+                            <th>Status</th>
+                            <th>Oylik</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contract in recent_contracts %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'admin_panel:contract_detail' contract.pk %}" class="link link-primary">
+                                    {{ contract.contract_number }}
+                                </a>
+                            </td>
+                            <td>{{ contract.organization_name }}</td>
+                            <td>
+                                <span class="badge badge-sm badge-{% if contract.status == 'active' %}success{% elif contract.status == 'pending' %}warning{% elif contract.status == 'expired' %}error{% else %}ghost{% endif %}">
+                                    {{ contract.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ contract.monthly_fee|floatformat:0 }} so'm</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-base-content/50">Shartnomalar yo'q</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- So'nggi To'lovlar -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="card-title">
+                    <i class="fas fa-money-bill-wave text-success"></i>
+                    So'nggi To'lovlar
+                </h2>
+                <a href="{% url 'admin_panel:payments' %}" class="btn btn-ghost btn-sm">
+                    Barchasi
+                </a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table table-zebra table-sm">
+                    <thead>
+                        <tr>
+                            <th>Tashkilot</th>
+                            <th>Summa</th>
+                            <th>Status</th>
+                            <th>Sana</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in recent_payments %}
+                        <tr>
+                            <td>{{ payment.contract.organization_name }}</td>
+                            <td class="font-bold">{{ payment.amount|floatformat:0 }} so'm</td>
+                            <td>
+                                <span class="badge badge-sm badge-{% if payment.status == 'completed' %}success{% elif payment.status == 'pending' %}warning{% else %}error{% endif %}">
+                                    {{ payment.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ payment.created_at|date:"d.m.Y" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-base-content/50">To'lovlar yo'q</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('revenueChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [{
+            label: 'Tushum (so\'m)',
+            data: {{ chart_data|safe }},
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% if summary %}
+<div class="prose prose-invert max-w-none">
+    <div class="text-sm opacity-90" x-data x-init="$el.innerHTML = `
+        <i class='fas fa-clock mr-2'></i>
+        Yangilandi: {{ summary.created_at|date:'d.m.Y H:i' }}
+    `"></div>
+    <div class="mt-4">
+        <div class="whitespace-pre-line">{{ summary.content }}</div>
+    </div>
+</div>
+{% else %}
+<div>
+    <p class="text-sm opacity-90">
+        <i class="fas fa-info-circle mr-2"></i>
+        Bugungi AI hisobot hozir tayyorlanmoqda...
+    </p>
+    <div class="mt-4 flex items-center gap-4">
+        <div class="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
+            <div class="h-full bg-white animate-pulse w-2/3"></div>
+        </div>
+        <span class="text-xs">Tayyorlanmoqda...</span>
+    </div>
+</div>
+{% endif %}

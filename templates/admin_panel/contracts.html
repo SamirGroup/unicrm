@@ -1,0 +1,133 @@
+{% extends 'admin_panel/base.html' %}
+{% block title %}Shartnomalar{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-3xl font-bold">Shartnomalar</h1>
+        <p class="text-base-content/70">Barcha shartnomalar va modullar boshqaruvi</p>
+    </div>
+    <a href="{% url 'admin_panel:contract_create' %}" class="btn btn-primary gap-2">
+        <i class="fas fa-plus"></i>
+        Yangi shartnoma
+    </a>
+</div>
+
+<!-- Filterlar -->
+<div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card-body py-4">
+        <form method="get" class="flex flex-wrap gap-4">
+            <div class="flex-1 min-w-[200px]">
+                <input type="text" name="search" value="{{ search }}" 
+                       placeholder="Qidiruv..." class="input input-bordered w-full">
+            </div>
+            <select name="status" class="select select-bordered">
+                <option value="">Barcha statuslar</option>
+                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Faol</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Kutilmoqda</option>
+                <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>Tugagan</option>
+                <option value="suspended" {% if status_filter == 'suspended' %}selected{% endif %}>To'xtatilgan</option>
+            </select>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i>
+                Qidirish
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Jadval -->
+<div class="card bg-base-100 shadow-xl">
+    <div class="card-body p-0">
+        <div class="overflow-x-auto">
+            <table class="table table-zebra">
+                <thead>
+                    <tr>
+                        <th>Raqam</th>
+                        <th>Tashkilot</th>
+                        <th>Modullar</th>
+                        <th>Muddat</th>
+                        <th>Oylik to'lov</th>
+                        <th>Qarzdorlik</th>
+                        <th>Status</th>
+                        <th>Amallar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contract in contracts %}
+                    <tr>
+                        <td class="font-mono font-bold">{{ contract.contract_number }}</td>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="avatar placeholder">
+                                    <div class="bg-primary text-primary-content rounded-full w-8">
+                                        <span>{{ contract.organization_name|first|upper }}</span>
+                                    </div>
+                                </div>
+                                {{ contract.organization_name }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="flex flex-wrap gap-1 max-w-[200px]">
+                                {% with modules_detail=contract.get_modules_detail %}
+                                    {% for mod in modules_detail.modules|slice:":3" %}
+                                    <span class="badge badge-xs badge-primary">{{ mod.name }}</span>
+                                    {% endfor %}
+                                    {% if modules_detail.modules|length > 3 %}
+                                    <span class="badge badge-xs badge-ghost">+{{ modules_detail.modules|length|add:"-3" }}</span>
+                                    {% endif %}
+                                    {% if modules_detail.modules|length == 0 %}
+                                    <span class="text-xs text-base-content/50">Faqat asosiy</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="text-xs">
+                                <div>{{ contract.start_date|date:"d.m.Y" }}</div>
+                                <div>{{ contract.end_date|date:"d.m.Y" }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="text-sm">
+                                <span class="font-bold">{{ contract.monthly_fee|floatformat:0 }}</span> so'm
+                                {% if contract.modules_monthly_fee > 0 %}
+                                <div class="text-xs text-success">+{{ contract.modules_monthly_fee|floatformat:0 }} modullar</div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="{% if contract.total_debt > 0 %}text-error font-bold{% else %}text-success{% endif %}">
+                            {{ contract.total_debt|floatformat:0 }} so'm
+                        </td>
+                        <td>
+                            <span class="badge badge-sm badge-{% if contract.status == 'active' %}success{% elif contract.status == 'pending' %}warning{% elif contract.status == 'expired' %}error{% else %}ghost{% endif %}">
+                                {{ contract.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="flex gap-2">
+                                <a href="{% url 'admin_panel:contract_detail' contract.pk %}" 
+                                   class="btn btn-ghost btn-sm btn-circle" title="Batafsil">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'admin_panel:contract_edit' contract.pk %}" 
+                                   class="btn btn-ghost btn-sm btn-circle text-primary" title="Tahrirlash">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-8 text-base-content/50">
+                            <i class="fas fa-folder-open text-4xl mb-2"></i>
+                            <p>Shartnomalar topilmadi</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

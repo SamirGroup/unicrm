@@ -1,0 +1,57 @@
+{% load static %}
+<nav class="bg-base-100 shadow-lg fixed top-0 left-0 right-0 z-40">
+    <div class="navbar px-4">
+        <div class="flex-1">
+            <button @click="sidebarOpen = !sidebarOpen" class="btn btn-ghost btn-circle lg:hidden">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a href="/dashboard/" class="btn btn-ghost normal-case text-xl ml-2">
+                <i class="fas fa-rocket text-primary"></i> UniCRM AI
+            </a>
+        </div>
+        
+        <div class="flex-none gap-2">
+            <!-- Theme Toggle -->
+            <label class="swap swap-rotate btn btn-ghost btn-circle">
+                <input type="checkbox" x-model="darkMode" @change="document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light')" />
+                <i class="fas fa-sun swap-on text-lg"></i>
+                <i class="fas fa-moon swap-off text-lg"></i>
+            </label>
+            
+            <!-- Notifications -->
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+                    <div class="indicator">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span class="badge badge-sm badge-primary indicator-item">3</span>
+                    </div>
+                </div>
+                <div tabindex="0" class="mt-16 z-[1] card card-compact dropdown-content w-52 bg-base-100 shadow">
+                    <div class="card-body">
+                        <span class="font-bold text-lg">3 Bildirishnoma</span>
+                        <span class="text-info">Barchasini ko'ring</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Menu -->
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar placeholder">
+                    <div class="bg-neutral text-neutral-content rounded-full w-10">
+                        <span>{{ user.username|default:"U" }}</span>
+                    </div>
+                </div>
+                <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                    <li>
+                        <a href="/accounts/profile/" class="justify-between">
+                            Profil
+                            <span class="badge">New</span>
+                        </a>
+                    </li>
+                    <li><a href="/workspace/create/">Workspace</a></li>
+                    <li><a href="{% url 'account_logout' %}" class="text-error">Chiqish</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>

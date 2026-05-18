@@ -1,0 +1,119 @@
+{% extends 'admin_panel/base.html' %}
+{% block title %}Tahrirlash: {{ contract.contract_number }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{% url 'admin_panel:contract_detail' contract.pk %}" class="btn btn-ghost btn-sm gap-2">
+        <i class="fas fa-arrow-left"></i>
+        Orqaga
+    </a>
+    <h1 class="text-3xl font-bold mt-2">Shartnomani tahrirlash</h1>
+    <p class="text-base-content/70">{{ contract.organization_name }}</p>
+</div>
+
+<div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Tashkilot nomi *</span>
+                    </label>
+                    <input type="text" name="organization_name" class="input input-bordered" 
+                           value="{{ contract.organization_name }}" required>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Shartnoma raqami *</span>
+                    </label>
+                    <input type="text" name="contract_number" class="input input-bordered" 
+                           value="{{ contract.contract_number }}" required>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Status *</span>
+                    </label>
+                    <select name="status" class="select select-bordered" required>
+                        <option value="active" {% if contract.status == 'active' %}selected{% endif %}>Faol</option>
+                        <option value="pending" {% if contract.status == 'pending' %}selected{% endif %}>Kutilmoqda</option>
+                        <option value="expired" {% if contract.status == 'expired' %}selected{% endif %}>Tugagan</option>
+                        <option value="suspended" {% if contract.status == 'suspended' %}selected{% endif %}>To'xtatilgan</option>
+                    </select>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Shartnoma sanasi *</span>
+                    </label>
+                    <input type="date" name="contract_date" class="input input-bordered" 
+                           value="{{ contract.contract_date|date:'Y-m-d' }}" required>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Boshlanish sanasi *</span>
+                    </label>
+                    <input type="date" name="start_date" class="input input-bordered" 
+                           value="{{ contract.start_date|date:'Y-m-d' }}" required>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Tugash sanasi *</span>
+                    </label>
+                    <input type="date" name="end_date" class="input input-bordered" 
+                           value="{{ contract.end_date|date:'Y-m-d' }}" required>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Oylik to'lov (so'm) *</span>
+                    </label>
+                    <input type="number" name="monthly_fee" class="input input-bordered" 
+                           value="{{ contract.monthly_fee }}" required>
+                </div>
+            </div>
+            
+            <!-- Modullar -->
+            <div class="form-control mt-6">
+                <label class="label">
+                    <span class="label-text font-bold">Ruxsat etilgan modullar</span>
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 border rounded-lg">
+                    {% for module in available_modules %}
+                    <label class="label cursor-pointer border rounded-lg p-3 hover:bg-base-200">
+                        <span class="label-text">{{ module.name }}</span>
+                        <input type="checkbox" name="modules" value="{{ module.type }}" 
+                               class="checkbox checkbox-primary"
+                               {% if module.type in contract.allowed_modules %}checked{% endif %}>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Izohlar -->
+            <div class="form-control mt-4">
+                <label class="label">
+                    <span class="label-text">Izohlar</span>
+                </label>
+                <textarea name="notes" class="textarea textarea-bordered h-24">{{ contract.notes }}</textarea>
+            </div>
+            
+            <!-- Submit -->
+            <div class="flex justify-end gap-4 mt-6">
+                <a href="{% url 'admin_panel:contract_detail' contract.pk %}" class="btn btn-ghost">
+                    Bekor qilish
+                </a>
+                <button type="submit" class="btn btn-primary gap-2">
+                    <i class="fas fa-save"></i>
+                    Saqlash
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

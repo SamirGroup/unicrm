@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% block title %}Mijozlar{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold">Mijozlar</h1>
+        <p class="text-base-content/70">{{ workspace.name }}</p>
+    </div>
+    <button class="btn btn-primary">
+        <i class="fas fa-plus"></i>
+        Mijoz Qo'shish
+    </button>
+</div>
+
+<!-- Search and Filter -->
+<div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card-body py-4">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <input type="text" placeholder="Qidiruv..." class="input input-bordered w-full">
+            </div>
+            <select class="select select-bordered">
+                <option disabled selected>Manbani tanlang</option>
+                <option value="telegram">Telegram</option>
+                <option value="website">Website</option>
+                <option value="referral">Referral</option>
+                <option value="call">Call</option>
+                <option value="other">Boshqa</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Clients Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for client in clients %}
+    <div class="card bg-base-100 shadow-xl card-hover">
+        <div class="card-body">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="avatar placeholder">
+                        <div class="bg-gradient-to-br from-primary to-secondary text-white rounded-full w-12">
+                            <span>{{ client.first_name|first|upper }}{{ client.last_name|first|upper }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold">{{ client.full_name }}</h3>
+                        <span class="text-sm opacity-70">{{ client.get_source_display }}</span>
+                    </div>
+                </div>
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-ghost btn-xs">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </div>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-48">
+                        <li><a href="/clients/{{ workspace.slug }}/{{ client.id }}/"><i class="fas fa-eye"></i> Ko'rish</a></li>
+                        <li><a><i class="fas fa-edit"></i> Tahrirlash</a></li>
+                        <li><a class="text-error"><i class="fas fa-trash"></i> O'chirish</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="space-y-2 text-sm">
+                {% if client.phone %}
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-phone w-5 text-base-content/50"></i>
+                    <span>{{ client.phone }}</span>
+                </div>
+                {% endif %}
+                
+                {% if client.email %}
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-envelope w-5 text-base-content/50"></i>
+                    <span>{{ client.email }}</span>
+                </div>
+                {% endif %}
+                
+                {% if client.telegram_username %}
+                <div class="flex items-center gap-2">
+                    <i class="fab fa-telegram w-5 text-base-content/50"></i>
+                    <span>@{{ client.telegram_username }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if client.tags %}
+            <div class="flex flex-wrap gap-1 mt-3">
+                {% for tag in client.tags|split:', ' %}
+                <span class="badge badge-ghost badge-sm">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="divider my-2"></div>
+            
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-base-content/70">
+                    <i class="fas fa-shopping-cart w-5"></i>
+                    {{ client.orders.count }} buyurtma
+                </span>
+                <span class="font-semibold">
+                    {% with total=client.orders|sum:'total_amount' %}
+                    {{ total|default:0 }} so'm
+                    {% endwith %}
+                </span>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body text-center py-12">
+                <i class="fas fa-users text-6xl text-base-content/20 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">Mijozlar topilmadi</h2>
+                <p class="text-base-content/70 mb-6">Birinchi mijozingizni qo'shing.</p>
+                <button class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Mijoz Qo'shish
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

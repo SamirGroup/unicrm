@@ -1,0 +1,136 @@
+{% load i18n %}
+{% load account socialaccount %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ro'yxatdan o'tish - UniCRM AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <div class="card w-full max-w-md glass-card shadow-2xl">
+        <div class="card-body p-8">
+            <!-- Logo -->
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 mx-auto bg-gradient-to-br from-success to-emerald-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                    <i class="fas fa-user-plus text-4xl text-white"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Ro'yxatdan o'tish</h1>
+                <p class="text-gray-500 mt-1">Yangi akkaunt yaratish</p>
+            </div>
+            
+            <!-- Messages -->
+            {% if messages %}
+            <div class="mb-4 space-y-2">
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %} alert-sm shadow-sm">
+                    <i class="fas fa-info-circle"></i>
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <!-- Signup Form -->
+            <form method="post" action="{% url 'account_signup' %}">
+                {% csrf_token %}
+                
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                {% endif %}
+                
+                <!-- Username -->
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Foydalanuvchi nomi</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <input type="text" name="username" placeholder="username" 
+                               class="input input-bordered w-full pl-10" required autofocus>
+                    </div>
+                </div>
+                
+                <!-- Email -->
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Email</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        <input type="email" name="email" placeholder="email@example.com" 
+                               class="input input-bordered w-full pl-10">
+                    </div>
+                </div>
+                
+                <!-- Password -->
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Parol</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password" name="password1" placeholder="••••••••" 
+                               class="input input-bordered w-full pl-10" required>
+                    </div>
+                </div>
+                
+                <!-- Confirm Password -->
+                <div class="form-control mb-6">
+                    <label class="label">
+                        <span class="label-text font-semibold">Parolni tasdiqlang</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password" name="password2" placeholder="••••••••" 
+                               class="input input-bordered w-full pl-10" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-success btn-block shadow-lg hover:shadow-xl transition-all">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Ro'yxatdan o'tish
+                </button>
+            </form>
+            
+            <div class="divider text-sm text-gray-400">yoki</div>
+            
+            <!-- Login Link -->
+            <div class="text-center">
+                <p class="text-gray-600 mb-3">Akkauntingiz bormi?</p>
+                <a href="{% url 'account_login' %}" class="btn btn-outline btn-success btn-block">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Kirish
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="fixed bottom-4 text-white/80 text-sm">
+        <p>© 2024 UniCRM AI. Barcha huquqlar himoyalangan.</p>
+    </div>
+</body>
+</html>

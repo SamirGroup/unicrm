@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Workspace Sozlamalari{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold">Workspace Sozlamalari</h1>
+    <p class="text-base-content/70">{{ workspace.name }}</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Sidebar -->
+    <div class="lg:col-span-1">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <ul class="menu">
+                    <li class="menu-title">Sozlamalar</li>
+                    <li><a class="active"><i class="fas fa-cog w-5"></i> Umumiy</a></li>
+                    <li><a><i class="fas fa-shield-alt w-5"></i> Xavfsizlik</a></li>
+                    <li><a><i class="fas fa-bell w-5"></i> Bildirishnomalar</a></li>
+                    <li class="menu-title">Boshqaruv</li>
+                    <li><a href="/workspace/{{ workspace.slug }}/members/"><i class="fas fa-users w-5"></i> A'zolar</a></li>
+                    <li><a href="/workspace/{{ workspace.slug }}/modules/"><i class="fas fa-puzzle-piece w-5"></i> Modullar</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Form -->
+    <div class="lg:col-span-2">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Umumiy Sozlamalar</h2>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="form-control w-full mb-4">
+                        <label class="label">
+                            <span class="label-text font-semibold">Workspace Nomi</span>
+                        </label>
+                        <input type="text" name="name" value="{{ workspace.name }}" class="input input-bordered w-full" required>
+                    </div>
+                    
+                    <div class="form-control w-full mb-4">
+                        <label class="label">
+                            <span class="label-text font-semibold">Logo</span>
+                        </label>
+                        {% if workspace.logo %}
+                        <div class="mb-2">
+                            <img src="{{ workspace.logo.url }}" alt="Logo" class="w-24 h-24 rounded-lg object-cover">
+                        </div>
+                        {% endif %}
+                        <input type="file" name="logo" class="file-input file-input-bordered w-full" accept="image/*">
+                    </div>
+                    
+                    <div class="form-control w-full mb-4">
+                        <label class="label">
+                            <span class="label-text font-semibold">Plan</span>
+                        </label>
+                        <select name="plan" class="select select-bordered w-full">
+                            <option value="free" {% if workspace.plan == 'free' %}selected{% endif %}>Free</option>
+                            <option value="starter" {% if workspace.plan == 'starter' %}selected{% endif %}>Starter</option>
+                            <option value="business" {% if workspace.plan == 'business' %}selected{% endif %}>Business</option>
+                            <option value="premium" {% if workspace.plan == 'premium' %}selected{% endif %}>Premium</option>
+                        </select>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <div class="flex gap-3 justify-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Saqlash
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

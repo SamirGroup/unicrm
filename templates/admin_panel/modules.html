@@ -1,0 +1,89 @@
+{% extends 'admin_panel/base.html' %}
+{% block title %}Modullar{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold">Modullar Boshqaruvi</h1>
+    <p class="text-base-content/70">Barcha modullar, narxlari va kategoriyalari</p>
+</div>
+
+<!-- Modullar statistikasi -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="stat bg-base-100 shadow-lg rounded-box">
+        <div class="stat-title">Jami modullar</div>
+        <div class="stat-value text-primary">{{ modules|length }}</div>
+    </div>
+    <div class="stat bg-base-100 shadow-lg rounded-box">
+        <div class="stat-title">Faol</div>
+        <div class="stat-value text-success">{{ modules|filter_by:"is_active"|length|default:"0" }}</div>
+    </div>
+    <div class="stat bg-base-100 shadow-lg rounded-box">
+        <div class="stat-title">Premium</div>
+        <div class="stat-value text-warning">{{ modules|filter_by:"is_premium"|length|default:"0" }}</div>
+    </div>
+    <div class="stat bg-base-100 shadow-lg rounded-box">
+        <div class="stat-title">Kategoriyalar</div>
+        <div class="stat-value text-info">
+            {% with cats=modules|map:"category"|unique %}{{ cats|length|default:"0" }}{% endwith %}
+        </div>
+    </div>
+</div>
+
+<!-- Modullar kategoriyalar bo'yicha -->
+{% regroup modules by get_category_display as modules_by_category %}
+
+<div class="space-y-6">
+    {% for category in modules_by_category %}
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title text-xl mb-4">
+                <i class="fas fa-folder-open text-primary mr-2"></i>
+                {{ category.grouper }}
+                <span class="badge badge-primary badge-sm">{{ category.list|length }}</span>
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for module in category.list %}
+                <div class="card bg-base-200 shadow-sm hover:shadow-md transition-all">
+                    <div class="card-body p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                                <i class="fas fa-{{ module.icon }} text-white"></i>
+                            </div>
+                            <div class="flex gap-1">
+                                {% if module.is_premium %}
+                                <span class="badge badge-warning badge-sm">Premium</span>
+                                {% endif %}
+                                <span class="badge badge-{% if module.is_active %}success{% else %}error{% endif %} badge-sm">
+                                    {% if module.is_active %}Faol{% else %}Faol emas{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <h3 class="font-bold text-lg">{{ module.name }}</h3>
+                        <p class="text-sm text-base-content/60 mb-2">{{ module.description|truncatechars:60|default:"Tavsif yo'q" }}</p>
+                        
+                        <div class="flex justify-between items-center mt-3">
+                            <span class="text-2xl font-bold text-primary">{{ module.price|floatformat:0 }} <span class="text-sm font-normal">so'm</span></span>
+                            <a href="{% url 'admin_panel:module_edit' module.pk %}" class="btn btn-primary btn-sm gap-1">
+                                <i class="fas fa-edit"></i>
+                                Tahrirlash
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body text-center py-12">
+            <i class="fas fa-puzzle-piece text-4xl text-base-content/30 mb-4"></i>
+            <h3 class="text-xl font-bold">Modullar yo'q</h3>
+            <p class="text-base-content/50">Hozircha hech qanday modul mavjud emas</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

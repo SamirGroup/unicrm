@@ -1,0 +1,37 @@
+# Django Core
+Django==5.1
+
+# Authentication
+django-allauth==0.61.1
+
+# Database
+Pillow==10.2.0
+
+# Telegram Bot
+python-telegram-bot==20.7
+
+# Environment
+python-dotenv==1.0.0
+
+# HTTP Requests
+requests==2.31.0
+
+# AI Integration
+openai==1.12.0
+
+# Background Tasks
+celery==5.3.4
+redis==5.0.1
+
+# WebSockets
+channels==4.0.0
+channels-redis==4.1.0
+
+# HTMX Support
+django-htmx==1.17.3
+
+# Widget Tweaks
+django-widget-tweaks==1.5.0
+
+# Production
+gunicorn==21.2.0

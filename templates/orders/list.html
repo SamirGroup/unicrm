@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Buyurtmalar{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold">Buyurtmalar</h1>
+        <p class="text-base-content/70">{{ workspace.name }}</p>
+    </div>
+    <button class="btn btn-primary">
+        <i class="fas fa-plus"></i>
+        Buyurtma Yaratish
+    </button>
+</div>
+
+<!-- Filters -->
+<div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card-body py-4">
+        <div class="flex flex-wrap gap-4">
+            <div class="flex-1 min-w-64">
+                <input type="text" placeholder="Qidiruv..." class="input input-bordered w-full">
+            </div>
+            <select class="select select-bordered">
+                <option disabled selected>Status</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+            <input type="date" class="input input-bordered">
+        </div>
+    </div>
+</div>
+
+<!-- Orders Table -->
+<div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+        <div class="overflow-x-auto">
+            <table class="table table-zebra">
+                <thead>
+                    <tr>
+                        <th>Buyurtma №</th>
+                        <th>Mijoz</th>
+                        <th>Status</th>
+                        <th>Summa</th>
+                        <th>Sana</th>
+                        <th>Amallar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>
+                            <a href="/orders/{{ workspace.slug }}/{{ order.id }}/" class="text-primary hover:underline font-semibold">
+                                {{ order.order_number }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if order.client %}
+                            <a href="/clients/{{ workspace.slug }}/{{ order.client.id }}/" class="hover:underline">
+                                {{ order.client.full_name }}
+                            </a>
+                            {% else %}
+                            <span class="text-base-content/50">Noma'lum</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge badge-{% if order.status == 'completed' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'processing' %}primary{% else %}error{% endif %} badge-sm">
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="font-semibold">{{ order.total_amount }} so'm</td>
+                        <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                        <td>
+                            <div class="flex gap-1">
+                                <a href="/orders/{{ workspace.slug }}/{{ order.id }}/" class="btn btn-ghost btn-xs" title="Ko'rish">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button class="btn btn-ghost btn-xs" title="Tahrirlash">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-8">
+                            <i class="fas fa-shopping-cart text-4xl text-base-content/20 mb-2"></i>
+                            <p class="text-base-content/50">Buyurtmalar topilmadi</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

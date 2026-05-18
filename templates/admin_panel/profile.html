@@ -1,0 +1,146 @@
+{% extends 'admin_panel/base.html' %}
+{% block title %}Profil{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold">Admin Profili</h1>
+    <p class="text-base-content/70">Shaxsiy ma'lumotlar va xavfsizlik sozlamalari</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Profil ma'lumotlari -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title text-primary">
+                <i class="fas fa-user-circle"></i>
+                Profil ma'lumotlari
+            </h2>
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Login</span>
+                    </label>
+                    <input type="text" class="input input-bordered" 
+                           value="{{ admin.username }}" disabled>
+                    <label class="label">
+                        <span class="label-text-alt">Login o'zgartirib bo'lmaydi</span>
+                    </label>
+                </div>
+                
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">To'liq ism</span>
+                    </label>
+                    <input type="text" name="full_name" class="input input-bordered" 
+                           value="{{ admin.full_name }}" placeholder="Ismingiz">
+                </div>
+                
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Email</span>
+                    </label>
+                    <input type="email" name="email" class="input input-bordered" 
+                           value="{{ admin.email }}" placeholder="email@example.com">
+                </div>
+                
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Telefon</span>
+                    </label>
+                    <input type="text" name="phone" class="input input-bordered" 
+                           value="{{ admin.phone }}" placeholder="+998 XX XXX XX XX">
+                </div>
+                
+                <div class="flex justify-end">
+                    <button type="submit" class="btn btn-primary gap-2">
+                        <i class="fas fa-save"></i>
+                        Saqlash
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Parolni o'zgartirish -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title text-warning">
+                <i class="fas fa-key"></i>
+                Parolni o'zgartirish
+            </h2>
+            
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                <div class="flex items-center gap-2 text-amber-700">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span class="text-sm">Xavfsizlik uchun parolni muntazam ravishda o'zgartiring!</span>
+                </div>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Joriy parol *</span>
+                    </label>
+                    <input type="password" name="current_password" class="input input-bordered" 
+                           placeholder="Hozirgi parol" required>
+                </div>
+                
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text">Yangi parol *</span>
+                    </label>
+                    <input type="password" name="new_password" class="input input-bordered" 
+                           placeholder="Yangi parol" required>
+                </div>
+                
+                <div class="form-control mb-6">
+                    <label class="label">
+                        <span class="label-text">Yangi parolni tasdiqlang *</span>
+                    </label>
+                    <input type="password" name="confirm_password" class="input input-bordered" 
+                           placeholder="Parolni takrorlang" required>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button type="submit" class="btn btn-warning gap-2 text-white">
+                        <i class="fas fa-lock"></i>
+                        Parolni o'zgartirish
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Tizim ma'lumotlari -->
+    <div class="card bg-base-100 shadow-xl lg:col-span-2">
+        <div class="card-body">
+            <h2 class="card-title text-info">
+                <i class="fas fa-info-circle"></i>
+                Tizim ma'lumotlari
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="stat bg-base-200 rounded-lg">
+                    <div class="stat-title">ID</div>
+                    <div class="stat-value text-lg">{{ admin.id }}</div>
+                </div>
+                <div class="stat bg-base-200 rounded-lg">
+                    <div class="stat-title">Yaratilgan</div>
+                    <div class="stat-value text-lg">{{ admin.created_at|date:"d.m.Y" }}</div>
+                </div>
+                <div class="stat bg-base-200 rounded-lg">
+                    <div class="stat-title">Status</div>
+                    <div class="stat-value text-lg">
+                        <span class="badge badge-success badge-lg">Faol</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

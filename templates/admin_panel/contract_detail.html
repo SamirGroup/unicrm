@@ -1,0 +1,289 @@
+{% extends 'admin_panel/base.html' %}
+{% block title %}Shartnoma: {{ contract.contract_number }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{% url 'admin_panel:contracts' %}" class="btn btn-ghost btn-sm gap-2">
+        <i class="fas fa-arrow-left"></i>
+        Orqaga
+    </a>
+    <div class="flex justify-between items-center mt-2">
+        <div>
+            <h1 class="text-3xl font-bold">Shartnoma: {{ contract.contract_number }}</h1>
+            <p class="text-base-content/70">{{ contract.organization_name }}</p>
+        </div>
+        <a href="{% url 'admin_panel:contract_edit' contract.pk %}" class="btn btn-primary gap-2">
+            <i class="fas fa-edit"></i>
+            Tahrirlash
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Asosiy ma'lumotlar -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Shartnoma ma'lumotlari -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-primary">
+                    <i class="fas fa-file-contract"></i>
+                    Shartnoma ma'lumotlari
+                </h2>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-base-content/60">Status</p>
+                        <span class="badge badge-{% if contract.status == 'active' %}success{% elif contract.status == 'pending' %}warning{% elif contract.status == 'expired' %}error{% else %}ghost{% endif %} badge-lg">
+                            {{ contract.get_status_display }}
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-base-content/60">Shartnoma sanasi</p>
+                        <p class="font-semibold">{{ contract.contract_date|date:"d.m.Y" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-base-content/60">Boshlanish sanasi</p>
+                        <p class="font-semibold">{{ contract.start_date|date:"d.m.Y" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-base-content/60">Tugash sanasi</p>
+                        <p class="font-semibold">{{ contract.end_date|date:"d.m.Y" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modullar tafsilotlari -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-info">
+                    <i class="fas fa-puzzle-piece"></i>
+                    Faol Modullar va To'lovlar
+                </h2>
+                
+                {% with modules_detail=contract.get_modules_detail %}
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>Modul</th>
+                                <th>Kategoriya</th>
+                                <th>Status</th>
+                                <th class="text-right">Narxi (so'm)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-base-200">
+                                <td class="font-bold">
+                                    <i class="fas fa-cube text-primary mr-2"></i>
+                                    Asosiy tarif
+                                </td>
+                                <td>Asosiy</td>
+                                <td><span class="badge badge-success badge-sm">Doim faol</span></td>
+                                <td class="text-right font-bold">{{ contract.base_monthly_fee|floatformat:0 }}</td>
+                            </tr>
+                            {% for mod in modules_detail.modules %}
+                            <tr>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-{{ mod.icon }} text-primary"></i>
+                                        {{ mod.name }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-sm badge-ghost">{{ mod.category }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-sm badge-{% if mod.is_active %}success{% else %}error{% endif %}">
+                                        {% if mod.is_active %}Faol{% else %}Faol emas{% endif %}
+                                    </span>
+                                </td>
+                                <td class="text-right font-semibold">{{ mod.price|floatformat:0 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-primary/5 font-bold">
+                                <td colspan="3" class="text-right">Modullar jami:</td>
+                                <td class="text-right text-primary">{{ modules_detail.total|floatformat:0 }} so'm</td>
+                            </tr>
+                            <tr class="bg-success/10 font-bold text-lg">
+                                <td colspan="3" class="text-right">Umumiy oylik to'lov:</td>
+                                <td class="text-right text-success">{{ contract.monthly_fee|floatformat:0 }} so'm</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% endwith %}
+                
+                <!-- Modullar vizual ko'rinishi -->
+                <div class="mt-6">
+                    <h4 class="font-bold mb-3">Modullar Vizual Ko'rinishi</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {% with modules_detail=contract.get_modules_detail %}
+                        {% for mod in modules_detail.modules %}
+                        <div class="card bg-base-200 shadow-sm">
+                            <div class="card-body p-3 text-center">
+                                <i class="fas fa-{{ mod.icon }} text-2xl text-primary mb-2"></i>
+                                <p class="font-semibold text-sm">{{ mod.name }}</p>
+                                <p class="text-xs text-base-content/60">{{ mod.price|floatformat:0 }} so'm</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- To'lovlar tarixi -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="card-title text-success">
+                        <i class="fas fa-money-bill-wave"></i>
+                        To'lovlar tarixi
+                    </h2>
+                    <a href="{% url 'admin_panel:payment_add' contract.pk %}" class="btn btn-success btn-sm gap-2">
+                        <i class="fas fa-plus"></i>
+                        To'lov qo'shish
+                    </a>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>Sana</th>
+                                <th>Summa</th>
+                                <th>Metod</th>
+                                <th>Status</th>
+                                <th>Davomiylik</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in payments %}
+                            <tr>
+                                <td>{{ payment.created_at|date:"d.m.Y H:i" }}</td>
+                                <td class="font-bold">{{ payment.amount|floatformat:0 }} so'm</td>
+                                <td>{{ payment.payment_method|default:"-" }}</td>
+                                <td>
+                                    <span class="badge badge-sm badge-{% if payment.status == 'completed' %}success{% elif payment.status == 'pending' %}warning{% else %}error{% endif %}">
+                                        {{ payment.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="text-xs">
+                                        {{ payment.period_start|date:"d.m.Y" }} - {{ payment.period_end|date:"d.m.Y" }}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-base-content/50">
+                                    To'lovlar yo'q
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Yon panel -->
+    <div class="space-y-6">
+        <!-- Foydalanuvchi -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title">
+                    <i class="fas fa-user"></i>
+                    Foydalanuvchi
+                </h2>
+                {% if contract.owner_user %}
+                <div class="avatar placeholder mb-2">
+                    <div class="bg-primary text-primary-content rounded-full w-16">
+                        <span class="text-2xl">{{ contract.owner_user.username|first|upper }}</span>
+                    </div>
+                </div>
+                <p class="font-bold">{{ contract.owner_user.username }}</p>
+                <p class="text-sm">{{ contract.owner_user.email|default:"Email yo'q" }}</p>
+                <a href="{% url 'admin_panel:user_detail' contract.owner_user.pk %}" class="btn btn-ghost btn-sm btn-block mt-2">
+                    Profilni ko'rish
+                </a>
+                {% else %}
+                <p class="text-base-content/50">Foydalanuvchi bog'lanmagan</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Moliyaviy ma'lumotlar -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-warning">
+                    <i class="fas fa-calculator"></i>
+                    Moliyaviy ma'lumotlar
+                </h2>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span>Asosiy tarif:</span>
+                        <span class="font-bold">{{ contract.base_monthly_fee|floatformat:0 }} so'm</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Modullar:</span>
+                        <span class="font-bold">{{ contract.modules_monthly_fee|floatformat:0 }} so'm</span>
+                    </div>
+                    <div class="divider my-1"></div>
+                    <div class="flex justify-between">
+                        <span class="font-bold">Jami oylik:</span>
+                        <span class="font-bold text-primary">{{ contract.monthly_fee|floatformat:0 }} so'm</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Jami to'langan:</span>
+                        <span class="font-bold text-success">{{ contract.total_paid|floatformat:0 }} so'm</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Qarzdorlik:</span>
+                        <span class="font-bold {% if contract.total_debt > 0 %}text-error{% else %}text-success{% endif %}">
+                            {{ contract.total_debt|floatformat:0 }} so'm
+                        </span>
+                    </div>
+                </div>
+                
+                {% if contract.total_debt > 0 %}
+                <a href="{% url 'admin_panel:payment_add' contract.pk %}" class="btn btn-warning btn-block mt-4 text-white">
+                    <i class="fas fa-credit-card"></i>
+                    To'lov qilish
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Modullar holati -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-info">
+                    <i class="fas fa-list-check"></i>
+                    Modullar Statusi
+                </h2>
+                
+                {% with modules_detail=contract.get_modules_detail %}
+                <div class="space-y-2">
+                    {% for mod in modules_detail.modules %}
+                    <div class="flex justify-between items-center p-2 rounded-lg {% if mod.is_active %}bg-success/10{% else %}bg-error/10{% endif %}">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-{{ mod.icon }}"></i>
+                            <span class="text-sm">{{ mod.name }}</span>
+                        </div>
+                        <span class="text-xs">{{ mod.price|floatformat:0 }} so'm</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

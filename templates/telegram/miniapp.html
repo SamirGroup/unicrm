@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% block title %}Telegram Mini App{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4" x-data="miniApp()" x-init="init()">
+    <!-- Header -->
+    <div class="navbar bg-base-100 shadow-lg mb-4">
+        <div class="flex-1">
+            <a class="btn btn-ghost normal-case text-xl">
+                <i class="fas fa-rocket text-primary"></i> UniCRM AI
+            </a>
+        </div>
+        <div class="flex-none">
+            <button class="btn btn-square btn-ghost" @click="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Stats -->
+    <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="card bg-primary text-primary-content shadow-xl">
+            <div class="card-body p-4 text-center">
+                <div class="text-3xl font-bold" x-text="stats.clients">0</div>
+                <div class="text-sm">Mijozlar</div>
+            </div>
+        </div>
+        <div class="card bg-secondary text-secondary-content shadow-xl">
+            <div class="card-body p-4 text-center">
+                <div class="text-3xl font-bold" x-text="stats.orders">0</div>
+                <div class="text-sm">Buyurtmalar</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-2 gap-4 mb-6">
+        <button class="btn btn-primary" @click="showSection = 'clients'">
+            <i class="fas fa-users text-xl"></i>
+            Mijozlar
+        </button>
+        <button class="btn btn-secondary" @click="showSection = 'orders'">
+            <i class="fas fa-shopping-cart text-xl"></i>
+            Buyurtmalar
+        </button>
+    </div>
+    
+    <!-- Recent Orders -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title mb-4">So'nggi Buyurtmalar</h2>
+            
+            <div class="space-y-3">
+                <template x-for="order in recentOrders" :key="order.id">
+                    <div class="card bg-base-200">
+                        <div class="card-body p-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="font-bold" x-text="order.number"></div>
+                                    <div class="text-sm opacity-70" x-text="order.client"></div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-bold text-primary" x-text="order.amount + ' so\'m'"></div>
+                                    <div class="badge badge-sm" 
+                                         :class="{
+                                             'badge-success': order.status === 'completed',
+                                             'badge-warning': order.status === 'pending',
+                                             'badge-primary': order.status === 'processing'
+                                         }"
+                                         x-text="order.statusText"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                
+                <div x-show="recentOrders.length === 0" class="text-center py-8">
+                    <i class="fas fa-inbox text-4xl text-base-content/20 mb-2"></i>
+                    <p class="text-base-content/50">Buyurtmalar yo'q</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 right-0 bg-base-100 shadow-lg border-t">
+        <div class="flex justify-around py-2">
+            <button class="flex flex-col items-center p-2" @click="showSection = 'dashboard'" 
+                    :class="{'text-primary': showSection === 'dashboard'}">
+                <i class="fas fa-home text-xl"></i>
+                <span class="text-xs">Asosiy</span>
+            </button>
+            <button class="flex flex-col items-center p-2" @click="showSection = 'clients'"
+                    :class="{'text-primary': showSection === 'clients'}">
+                <i class="fas fa-users text-xl"></i>
+                <span class="text-xs">Mijozlar</span>
+            </button>
+            <button class="flex flex-col items-center p-2" @click="showSection = 'orders'"
+                    :class="{'text-primary': showSection === 'orders'}">
+                <i class="fas fa-shopping-cart text-xl"></i>
+                <span class="text-xs">Buyurtmalar</span>
+            </button>
+            <button class="flex flex-col items-center p-2" @click="showSection = 'settings'"
+                    :class="{'text-primary': showSection === 'settings'}">
+                <i class="fas fa-cog text-xl"></i>
+                <span class="text-xs">Sozlamalar</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function miniApp() {
+    return {
+        workspaceId: '{{ workspace_id }}',
+        userId: '{{ user_id }}',
+        showSection: 'dashboard',
+        stats: {
+            clients: 0,
+            orders: 0
+        },
+        recentOrders: [],
+        
+        async init() {
+            // Initialize Telegram WebApp
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+                
+                // Authenticate
+                await this.authenticate();
+            }
+            
+            // Load data
+            await this.loadStats();
+            await this.loadRecentOrders();
+        },
+        
+        async authenticate() {
+            // Telegram WebApp authentication would go here
+            console.log('Authenticated with Telegram');
+        },
+        
+        async loadStats() {
+            try {
+                const response = await fetch('/dashboard/api/stats/');
+                const data = await response.json();
+                this.stats = {
+                    clients: data.clients || 0,
+                    orders: data.orders || 0
+                };
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        },
+        
+        async loadRecentOrders() {
+            try {
+                const response = await fetch('/orders/api/recent/');
+                const data = await response.json();
+                this.recentOrders = data.map(order => ({
+                    id: order.id,
+                    number: order.order_number,
+                    client: order.client_name || 'Noma\'lum',
+                    amount: order.total_amount,
+                    status: order.status,
+                    statusText: this.getStatusText(order.status)
+                }));
+            } catch (error) {
+                console.error('Error loading orders:', error);
+            }
+        },
+        
+        getStatusText(status) {
+            const statuses = {
+                'pending': 'Kutilmoqda',
+                'processing': 'Jarayonda',
+                'completed': 'Tayyor',
+                'cancelled': 'Bekor qilingan'
+            };
+            return statuses[status] || status;
+        },
+        
+        logout() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.close();
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

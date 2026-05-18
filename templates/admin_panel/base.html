@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel{% endblock %} - UniCRM AI Super Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        .sidebar-link {
+            @apply flex items-center gap-3 px-4 py-3 rounded-lg transition-all hover:bg-base-200;
+        }
+        .sidebar-link.active {
+            @apply bg-primary text-primary-content;
+        }
+    </style>
+</head>
+<body class="bg-base-200 min-h-screen">
+    <!-- Navbar -->
+    <nav class="navbar bg-base-100 shadow-lg fixed top-0 left-0 right-0 z-50">
+        <div class="navbar-start">
+            <label for="sidebar-drawer" class="btn btn-ghost drawer-button lg:hidden">
+                <i class="fas fa-bars text-xl"></i>
+            </label>
+            <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-ghost normal-case text-xl">
+                <i class="fas fa-shield-alt text-primary mr-2"></i>
+                Super Admin
+            </a>
+        </div>
+        <div class="navbar-end gap-2">
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost gap-2">
+                    <div class="avatar placeholder">
+                        <div class="bg-primary text-primary-content rounded-full w-8">
+                            <span class="text-sm">{{ admin_username|first|upper }}</span>
+                        </div>
+                    </div>
+                    <span class="hidden md:inline">{{ admin_username }}</span>
+                </div>
+                <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                    <li><a href="{% url 'admin_panel:profile' %}"><i class="fas fa-user"></i> Profil</a></li>
+                    <li><a href="{% url 'admin_panel:logout' %}" class="text-error"><i class="fas fa-sign-out-alt"></i> Chiqish</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="drawer lg:drawer-open pt-16">
+        <input id="sidebar-drawer" type="checkbox" class="drawer-toggle" />
+        
+        <div class="drawer-content p-4 md:p-6">
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-sm shadow-lg">
+                    <i class="fas fa-info-circle"></i>
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </div>
+        
+        <div class="drawer-side z-40">
+            <label for="sidebar-drawer" class="drawer-overlay"></label>
+            <aside class="bg-base-100 w-72 min-h-full shadow-xl">
+                <div class="p-4">
+                    <div class="flex items-center gap-3 mb-6 px-2">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">UniCRM AI</h3>
+                            <p class="text-xs text-base-content/60">Super Admin</p>
+                        </div>
+                    </div>
+                    
+                    <ul class="menu gap-1">
+                        <li>
+                            <a href="{% url 'admin_panel:dashboard' %}" class="{% if request.path == '/superadmin/' or request.path == '/superadmin/dashboard/' %}active{% endif %}">
+                                <i class="fas fa-tachometer-alt w-5"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        
+                        <li class="menu-title">Boshqaruv</li>
+                        
+                        <li>
+                            <a href="{% url 'admin_panel:contracts' %}" class="{% if '/contracts/' in request.path %}active{% endif %}">
+                                <i class="fas fa-file-contract w-5"></i>
+                                Shartnomalar
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a href="{% url 'admin_panel:payments' %}" class="{% if '/payments/' in request.path %}active{% endif %}">
+                                <i class="fas fa-money-bill-wave w-5"></i>
+                                To'lovlar
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a href="{% url 'admin_panel:users' %}" class="{% if '/users/' in request.path %}active{% endif %}">
+                                <i class="fas fa-users w-5"></i>
+                                Foydalanuvchilar
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a href="{% url 'admin_panel:modules' %}" class="{% if '/modules/' in request.path %}active{% endif %}">
+                                <i class="fas fa-puzzle-piece w-5"></i>
+                                Modullar
+                            </a>
+                        </li>
+                        
+                        <li class="menu-title">Sozlamalar</li>
+                        
+                        <li>
+                            <a href="{% url 'admin_panel:profile' %}">
+                                <i class="fas fa-user-cog w-5"></i>
+                                Profil
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a href="{% url 'admin_panel:logout' %}" class="text-error">
+                                <i class="fas fa-sign-out-alt w-5"></i>
+                                Chiqish
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </div>
+</body>
+</html>

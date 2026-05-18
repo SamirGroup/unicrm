@@ -1,0 +1,134 @@
+{%extends 'base.html' %}
+{% load custom_filters %}
+{% block title %}{{ client.full_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <nav class="flex text-sm mb-2">
+        <a href="/clients/{{ workspace.slug }}/" class="text-base-content/70 hover:text-primary">
+            <i class="fas fa-arrow-left"></i> Mijozlar
+        </a>
+        <span class="mx-2 text-base-content/50">/</span>
+        <span class="text-base-content">{{ client.full_name }}</span>
+    </nav>
+    <h1 class="text-3xl font-bold">{{ client.full_name }}</h1>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Client Info -->
+    <div class="lg:col-span-1">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <div class="text-center mb-6">
+                    <div class="avatar placeholder mb-4">
+                        <div class="bg-gradient-to-br from-primary to-secondary text-white rounded-full w-24 text-3xl">
+                            <span>{{ client.first_name|first|upper }}{{ client.last_name|first|upper }}</span>
+                        </div>
+                    </div>
+                    <h2 class="text-2xl font-bold">{{ client.full_name }}</h2>
+                    <span class="badge badge-primary badge-sm mt-2">{{ client.get_source_display }}</span>
+                </div>
+                
+                <div class="space-y-3">
+                    {% if client.phone %}
+                    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+                        <i class="fas fa-phone text-primary"></i>
+                        <span>{{ client.phone }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if client.email %}
+                    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+                        <i class="fas fa-envelope text-primary"></i>
+                        <span>{{ client.email }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if client.telegram_username %}
+                    <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+                        <i class="fab fa-telegram text-primary"></i>
+                        <span>@{{ client.telegram_username }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if client.tags %}
+                <div class="mt-4">
+                    <h3 class="font-semibold mb-2">Teglar</h3>
+                    <div class="flex flex-wrap gap-2">
+                        {% for tag in client.tags|split:', ' %}
+                        <span class="badge badge-ghost">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if client.notes %}
+                <div class="mt-4">
+                    <h3 class="font-semibold mb-2">Eslatmalar</h3>
+                    <p class="text-sm text-base-content/70 whitespace-pre-line">{{ client.notes }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Orders -->
+    <div class="lg:col-span-2">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="card-title">Buyurtmalar</h2>
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i>
+                        Yangi Buyurtma
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>Buyurtma №</th>
+                                <th>Status</th>
+                                <th>Summa</th>
+                                <th>Sana</th>
+                                <th>Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in client.orders.all %}
+                            <tr>
+                                <td>
+                                    <a href="/orders/{{ workspace.slug }}/{{ order.id }}/" class="text-primary hover:underline">
+                                        {{ order.order_number }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="badge badge-{% if order.status == 'completed' %}success{% elif order.status == 'pending' %}warning{% else %}primary{% endif %} badge-sm">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="font-semibold">{{ order.total_amount }} so'm</td>
+                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                <td>
+                                    <a href="/orders/{{ workspace.slug }}/{{ order.id }}/" class="btn btn-ghost btn-xs">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-8">
+                                    <p class="text-base-content/50">Buyurtmalar yo'q</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

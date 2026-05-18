@@ -1,0 +1,93 @@
+{% load static %}
+<aside 
+    x-show="sidebarOpen" 
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="-translate-x-full"
+    x-transition:enter-end="translate-x-0"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="translate-x-0"
+    x-transition:leave-end="-translate-x-full"
+    class="fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-base-100 shadow-xl z-30 lg:translate-x-0"
+    style="display: none;">
+    
+    <div class="p-4">
+        {% if workspace %}
+        <div class="mb-4 pb-4 border-b border-base-200">
+            <div class="flex items-center gap-3">
+                {% if workspace.logo %}
+                <img src="{{ workspace.logo.url }}" alt="{{ workspace.name }}" class="w-10 h-10 rounded-lg object-cover">
+                {% else %}
+                <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white font-bold">
+                    {{ workspace.name|first|upper }}
+                </div>
+                {% endif %}
+                <div>
+                    <h3 class="font-semibold text-sm">{{ workspace.name }}</h3>
+                    <span class="text-xs text-base-content/60 capitalize">{{ workspace.plan }} plan</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <ul class="menu gap-1">
+            <li>
+                <a href="/dashboard/" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                    <i class="fas fa-home w-5"></i>
+                    Dashboard
+                </a>
+            </li>
+            
+            {% if workspace %}
+            <li class="menu-title">Asosiy</li>
+            
+            <li>
+                <a href="/clients/{{ workspace.slug }}/" class="{% if 'clients' in request.path %}active{% endif %}">
+                    <i class="fas fa-users w-5"></i>
+                    Mijozlar
+                </a>
+            </li>
+            
+            <li>
+                <a href="/orders/{{ workspace.slug }}/" class="{% if 'orders' in request.path %}active{% endif %}">
+                    <i class="fas fa-shopping-cart w-5"></i>
+                    Buyurtmalar
+                </a>
+            </li>
+            
+            <li class="menu-title">Boshqaruv</li>
+            
+            <li>
+                <a href="/workspace/create/" class="{% if 'members' in request.path %}active{% endif %}">
+                    <i class="fas fa-user-friends w-5"></i>
+                    Workspace'lar
+                </a>
+            </li>
+            
+            {% if workspace %}
+            <li>
+                <a href="/workspace/{{ workspace.slug }}/modules/" class="{% if 'modules' in request.path %}active{% endif %}">
+                    <i class="fas fa-puzzle-piece w-5"></i>
+                    Modullar
+                </a>
+            </li>
+            
+            <li>
+                <a href="/workspace/{{ workspace.slug }}/settings/" class="{% if 'settings' in request.path %}active{% endif %}">
+                    <i class="fas fa-cog w-5"></i>
+                    Sozlamalar
+                </a>
+            </li>
+            {% endif %}
+            
+            <li class="menu-title">Hisobotlar</li>
+            
+            <li>
+                <a href="/ai/reports/" class="{% if 'ai' in request.path %}active{% endif %}">
+                    <i class="fas fa-robot w-5"></i>
+                    AI Hisobotlar
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</aside>

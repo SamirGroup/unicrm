@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}A'zolar{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold">A'zolar</h1>
+        <p class="text-base-content/70">{{ workspace.name }}</p>
+    </div>
+    <button class="btn btn-primary">
+        <i class="fas fa-plus"></i>
+        A'zo Qo'shish
+    </button>
+</div>
+
+<div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+        <div class="overflow-x-auto">
+            <table class="table table-zebra">
+                <thead>
+                    <tr>
+                        <th>A'zo</th>
+                        <th>Rol</th>
+                        <th>Qo'shilgan</th>
+                        <th>Amallar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for membership in memberships %}
+                    <tr>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="avatar placeholder">
+                                    <div class="bg-neutral text-neutral-content rounded-full w-10">
+                                        <span>{{ membership.user.username|first|upper }}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="font-bold">{{ membership.user.get_full_name|default:membership.user.username }}</div>
+                                    <div class="text-sm opacity-50">{{ membership.user.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge {% if membership.role == 'owner' %}badge-primary{% elif membership.role == 'admin' %}badge-secondary{% else %}badge-ghost{% endif %}">
+                                {{ membership.get_role_display }}
+                            </span>
+                        </td>
+                        <td>{{ membership.joined_at|date:"d.m.Y" }}</td>
+                        <td>
+                            <div class="dropdown dropdown-end">
+                                <div tabindex="0" role="button" class="btn btn-ghost btn-xs">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </div>
+                                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                    <li><a>Rolni o'zgartirish</a></li>
+                                    <li><a class="text-error">O'chirish</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-8">
+                            <i class="fas fa-users text-4xl text-base-content/20 mb-2"></i>
+                            <p class="text-base-content/50">Hozircha a'zolar yo'q</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

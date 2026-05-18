@@ -1,0 +1,87 @@
+{% extends 'admin_panel/base.html' %}
+{% block title %}Foydalanuvchilar{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold">Foydalanuvchilar</h1>
+    <p class="text-base-content/70">Barcha ro'yxatdan o'tgan foydalanuvchilar</p>
+</div>
+
+<!-- Qidiruv -->
+<div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card-body py-4">
+        <form method="get" class="flex gap-4">
+            <div class="flex-1">
+                <input type="text" name="search" value="{{ search }}" 
+                       placeholder="Qidiruv..." class="input input-bordered w-full">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i>
+                Qidirish
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Jadval -->
+<div class="card bg-base-100 shadow-xl">
+    <div class="card-body p-0">
+        <div class="overflow-x-auto">
+            <table class="table table-zebra">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Foydalanuvchi</th>
+                        <th>Email</th>
+                        <th>Ro'yxatdan o'tgan</th>
+                        <th>Status</th>
+                        <th>Amallar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td class="font-mono">{{ user.id }}</td>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="avatar placeholder">
+                                    <div class="bg-primary text-primary-content rounded-full w-10">
+                                        <span>{{ user.username|first|upper }}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="font-bold">{{ user.username }}</p>
+                                    <p class="text-xs text-base-content/60">
+                                        {{ user.first_name }} {{ user.last_name }}
+                                    </p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ user.email|default:"-" }}</td>
+                        <td>{{ user.date_joined|date:"d.m.Y H:i" }}</td>
+                        <td>
+                            <span class="badge badge-{% if user.is_active %}success{% else %}error{% endif %} badge-sm">
+                                {% if user.is_active %}Faol{% else %}Faol emas{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'admin_panel:user_detail' user.pk %}" 
+                               class="btn btn-ghost btn-sm btn-circle">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-8 text-base-content/50">
+                            <i class="fas fa-users text-4xl mb-2"></i>
+                            <p>Foydalanuvchilar topilmadi</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
